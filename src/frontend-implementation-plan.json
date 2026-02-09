@@ -1,0 +1,43 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix auth failure UX and authenticated bootstrap error recovery",
+  "requirements": [
+    {
+      "id": "REQ-8",
+      "summary": "Show a visible Internet Identity login error on the Login page with a safe message and retry action.",
+      "acceptanceCriteria": [
+        "When `useInternetIdentity().loginStatus === \"loginError\"`, the Login page renders a visible error message using the available `loginError.message` (or a safe fallback message).",
+        "The error state includes a clear \"Try again\" action that re-invokes login on user interaction.",
+        "No uncaught exceptions are thrown from the Login page when login fails."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/LoginPage.tsx",
+          "operation": "modify",
+          "description": "Add a user-facing error state driven by `loginStatus === \"loginError\"` and `loginError`, rendering an English message (with a safe fallback) and a \"Try again\" button that re-invokes `login()`; remove reliance on console-only error reporting and ensure rendering is exception-safe. Use guidance from the selected \"authorization\" component for handling auth errors in the UI. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Handle authenticated bootstrap failures (e.g., caller profile load) by showing a readable error view with logout recovery.",
+      "acceptanceCriteria": [
+        "If the app has an identity but `useGetCallerUserProfile()` errors, the UI displays an error panel/page (English text) explaining that initialization failed and provides a button to log out via the existing auth clear/logout flow.",
+        "The app does not get stuck on a blank screen when `getCallerUserProfile` traps/throws; the user always sees a recovery path (logout and retry login)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AuthBootstrapErrorView.tsx",
+          "operation": "create",
+          "description": "Create a reusable authenticated-bootstrap error view component that shows an English initialization failure message (including a safe, user-readable error detail when available) and a \"Log out\" action that calls the existing `useInternetIdentity().clear()` flow and clears React Query cache (matching current logout behavior). Use guidance from the selected \"authorization\" component for gracefully handling backend authorization traps in the UI. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Update `RootLayout` to detect and handle `useGetCallerUserProfile()` failures when an identity exists (e.g., `error` state from React Query): render `AuthBootstrapErrorView` instead of proceeding to `AppShell`/routes, preventing blank/error screens and ensuring the user can log out and retry login. Use guidance from the selected \"authorization\" component for auth gating and error recovery. Verify the component's usage instructions before implementing."
+        }
+      ]
+    }
+  ]
+}

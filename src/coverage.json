@@ -1,0 +1,61 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-09T15:23:47.687Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 3,
+    "implemented": 2,
+    "items": [
+      {
+        "id": "REQ-10",
+        "summary": "Fix the backend authorization logic so that a newly signed-in Internet Identity principal can successfully call `getCallerUserProfile` (and other user-level escalation CRUD methods) without requiring any out-of-band admin token initialization, while still preventing anonymous callers from accessing protected data.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Add a user-facing error state on the login screen so that when Internet Identity login fails, the page displays the error message (in English) and provides a retry action, instead of only logging to the console.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/LoginPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/LoginPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-9",
+        "summary": "Prevent post-login blank/error screens by handling failures of the authenticated bootstrap calls (e.g., loading the caller profile) in the authenticated app layout: show a readable error view with a \"Log out\" action when profile loading fails (including backend traps such as Unauthorized).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/AuthBootstrapErrorView.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/AuthBootstrapErrorView.tsx",
+          "frontend/src/App.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "build-request.json",
+    "build-template/README.md",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AuthBootstrapErrorView.tsx",
+    "frontend/src/pages/LoginPage.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

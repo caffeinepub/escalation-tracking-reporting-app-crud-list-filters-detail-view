@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 5,
+  "summary": "Web-based escalation tracking and reporting application for creating, viewing, and managing escalations with defined escalation/customer/project fields.",
+  "architectural_notes": [],
+  "known_issues": [
+    "User reports an error when signing in (authentication/sign-in flow failing)."
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-build-a-frontend-escalation-list-page-that-displays-all-escalations-in-a-sortable-table-or-equivalent-structured-list-with-quick-scanning-of-key-fields-and-allows-navigating-to-a-single-escalation-detail-view",
+      "title": "Build a frontend Escalation List page that displays all escalations in a sortable table (or equivalent structured list) with quick scanning of key fields, and allows navigating to a single escalation detail view.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-frontend-create-edit-escalation-form-that-supports-entering-and-updating-all-escalation-fields-listed-by-the-user-with-reasonable-input-types-text-multiline-text-date-numeric-and-basic-validation-for-required-identifiers-and-title",
+      "title": "Build a frontend Create/Edit Escalation form that supports entering and updating all escalation fields listed by the user, with reasonable input types (text, multiline text, date, numeric) and basic validation for required identifiers and title.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-frontend-escalation-detail-page-that-displays-all-fields-for-a-single-escalation-and-provides-actions-to-edit-or-delete-the-escalation-with-a-confirmation-step-before-delete",
+      "title": "Build a frontend Escalation Detail page that displays all fields for a single escalation and provides actions to edit or delete the escalation (with a confirmation step before delete).",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-basic-reporting-capabilities-on-the-frontend-provide-filter-controls-and-summary-counts-grouped-by-at-least-escalation-status-functional-area-and-business-group-allow-filtering-the-list-by-escalation-status-customer-name-escalation-manager-functional-area-business-group-and-created-date-range",
+      "title": "Add basic reporting capabilities on the frontend: provide filter controls and summary counts grouped by at least Escalation Status, Functional Area, and Business Group; allow filtering the list by Escalation Status, Customer Name, Escalation Manager, Functional Area, Business Group, and Created Date range.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-coherent-visual-theme-for-the-application-colors-typography-spacing-and-layout-and-apply-it-consistently-across-list-detail-and-form-screens-using-tailwind-and-the-existing-ui-components-avoid-using-a-blue-purple-dominant-palette",
+      "title": "Create a coherent visual theme for the application (colors, typography, spacing, and layout) and apply it consistently across list, detail, and form screens using Tailwind and the existing UI components; avoid using a blue/purple-dominant palette.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-user-facing-error-state-on-the-login-screen-so-that-when-internet-identity-login-fails-the-page-displays-the-error-message-in-english-and-provides-a-retry-action-instead-of-only-logging-to-the-console",
+      "title": "Add a user-facing error state on the login screen so that when Internet Identity login fails, the page displays the error message (in English) and provides a retry action, instead of only logging to the console.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-prevent-post-login-blank-error-screens-by-handling-failures-of-the-authenticated-bootstrap-calls-e-g-loading-the-caller-profile-in-the-authenticated-app-layout-show-a-readable-error-view-with-a-log-out-action-when-profile-loading-fails-including-backend-traps-such-as-unauthorized",
+      "title": "Prevent post-login blank/error screens by handling failures of the authenticated bootstrap calls (e.g., loading the caller profile) in the authenticated app layout: show a readable error view with a \"Log out\" action when profile loading fails (including backend traps such as Unauthorized).",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Build a web-based escalation tracking & reporting app with escalation creation/view/management using specified fields (title, reason, criteria, status, contacts, customer/project details, identifiers, product, etc.).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Implement backend data model and persistence for an Escalation record containing all user-specified fields: Escalation Title, Escalation Reason, De-escalation Criteria, Current Status, Escalation Manager, Functional Area, Escalation Trend, Escalation Status, Length of Escalation, Created Date, Escalation Type, Main Contact, Customer Name, Project Name, Reference Number, Escalation Number, Business Group, Product.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Add backend canister methods to create, read, update, and delete escalations, including: (1) create escalation, (2) list escalations, (3) get escalation by id, (4) update escalation fields, and (5) delete escalation.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Fix the backend authorization logic so that a newly signed-in Internet Identity principal can successfully call `getCallerUserProfile` (and other user-level escalation CRUD methods) without requiring any out-of-band admin token initialization, while still preventing anonymous callers from accessing protected data.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Escalation tracking & reporting app (CRUD, list, filters, detail view)",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

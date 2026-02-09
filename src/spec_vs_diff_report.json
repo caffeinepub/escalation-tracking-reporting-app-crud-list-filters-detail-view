@@ -1,0 +1,25 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-09T15:23:47.685Z",
+  "summary": "Diff implements all three requested fixes: (REQ-8) LoginPage now renders a visible sign-in error message and provides a retry action; (REQ-9) App root layout now renders an authenticated bootstrap error view with a logout recovery action when getCallerUserProfile fails; (REQ-10) backend authorization now allows any non-anonymous principal to call getCallerUserProfile and escalation CRUD while still trapping anonymous callers.",
+  "missing_requirements": [],
+  "hallucinated_features": [
+    {
+      "description": "Clearing the entire React Query cache as part of the logout action in the authenticated bootstrap error view.",
+      "reason": "REQ-9 requires providing a \"Log out\" action via the existing auth clear/logout flow, but does not explicitly request clearing the query cache; this is an extra behavior added beyond the stated acceptance criteria.",
+      "evidence": [
+        "frontend/src/components/AuthBootstrapErrorView.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.74,
+  "changed_files": [
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AuthBootstrapErrorView.tsx",
+    "frontend/src/pages/LoginPage.tsx",
+    "project_state.json"
+  ]
+}

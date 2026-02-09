@@ -1,0 +1,44 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-add-a-user-facing-error-state-on-the-login-screen-so-that-when-internet-identity-login-fails-the-page-displays-the-error-message-in-english-and-provides-a-retry-action-instead-of-only-logging-to-the-console",
+      "featureTitle": "Add a user-facing error state on the login screen so that when Internet Identity login fails, the page displays the error message (in English) and provides a retry action, instead of only logging to the console.",
+      "files": [
+        "frontend/src/pages/LoginPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-prevent-post-login-blank-error-screens-by-handling-failures-of-the-authenticated-bootstrap-calls-e-g-loading-the-caller-profile-in-the-authenticated-app-layout-show-a-readable-error-view-with-a-log-out-action-when-profile-loading-fails-including-backend-traps-such-as-unauthorized",
+      "featureTitle": "Prevent post-login blank/error screens by handling failures of the authenticated bootstrap calls (e.g., loading the caller profile) in the authenticated app layout: show a readable error view with a \"Log out\" action when profile loading fails (including backend traps such as Unauthorized).",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/AuthBootstrapErrorView.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

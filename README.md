@@ -1,2 +1,3 @@
-# escalation-tracking-reporting-app-crud-list-filters-detail-view
-Exported from Caffeine project: Escalation tracking &amp; reporting app (CRUD, list, filters, detail view)
+## 
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`

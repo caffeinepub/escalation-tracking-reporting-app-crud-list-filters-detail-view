@@ -1,0 +1,20 @@
+{
+  "frontend/src/App.tsx": "Main application component with TanStack Router setup, authentication flow via RootLayout component with error handling for profile loading failures, profile setup dialog, and routing for list/detail/create/edit pages.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including user profiles and escalation CRUD operations with proper cache invalidation.",
+  "frontend/src/hooks/useEscalationsFilters.ts": "Custom hook managing client-side filtering, sorting, and summary calculations for escalations with support for multiple filter dimensions.",
+  "frontend/src/components/AppShell.tsx": "Application layout shell with header navigation, user profile display, logout functionality, and footer with attribution.",
+  "frontend/src/components/ProfileSetupDialog.tsx": "Modal dialog for first-time user profile setup requiring name input before accessing the application.",
+  "frontend/src/pages/LoginPage.tsx": "Landing page with Internet Identity authentication that displays visible error messages with retry action when login fails.",
+  "frontend/src/pages/EscalationsListPage.tsx": "Main dashboard displaying escalations list with filters, summary cards, and table view with loading and error states.",
+  "frontend/src/pages/EscalationDetailPage.tsx": "Detail view showing all escalation fields with edit and delete actions including confirmation dialog.",
+  "frontend/src/pages/EscalationCreatePage.tsx": "Page for creating new escalations using the reusable escalation form component.",
+  "frontend/src/pages/EscalationEditPage.tsx": "Page for editing existing escalations with pre-filled form data and navigation back to detail view.",
+  "frontend/src/components/escalations/EscalationsTable.tsx": "Sortable table component displaying escalations with key fields and view action buttons.",
+  "frontend/src/components/escalations/EscalationForm.tsx": "Comprehensive form component with all 18 escalation fields including text inputs, textareas, and date picker with validation.",
+  "frontend/src/components/escalations/EscalationsFilters.tsx": "Filter controls for escalation status, customer, manager, functional area, business group, and date range with clear functionality.",
+  "frontend/src/components/escalations/EscalationsSummary.tsx": "Summary cards displaying grouped counts by status, functional area, and business group.",
+  "frontend/src/components/escalations/DeleteEscalationDialog.tsx": "Confirmation dialog for escalation deletion with warning message and loading state.",
+  "frontend/src/index.css": "Global styles with OKLCH color system using teal/cyan accents (hue ~170-180) instead of blue/purple for a fresh, professional look.",
+  "frontend/tailwind.config.js": "Tailwind configuration with custom color tokens, Inter font family, and extended design system matching the teal accent theme.",
+  "frontend/src/components/AuthBootstrapErrorView.tsx": "Error view component for authenticated bootstrap failures that shows initialization error details and provides logout recovery action."
+}

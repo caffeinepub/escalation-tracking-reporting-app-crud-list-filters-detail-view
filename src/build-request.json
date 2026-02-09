@@ -1,0 +1,83 @@
+{
+  "kind": "build_request",
+  "title": "Fix sign-in failure and show actionable authentication errors",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-8",
+      "text": "Add a user-facing error state on the login screen so that when Internet Identity login fails, the page displays the error message (in English) and provides a retry action, instead of only logging to the console.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "There is an error when signing in"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When `useInternetIdentity().loginStatus === \"loginError\"`, the Login page renders a visible error message using the available `loginError.message` (or a safe fallback message).",
+        "The error state includes a clear \"Try again\" action that re-invokes login on user interaction.",
+        "No uncaught exceptions are thrown from the Login page when login fails."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Prevent post-login blank/error screens by handling failures of the authenticated bootstrap calls (e.g., loading the caller profile) in the authenticated app layout: show a readable error view with a \"Log out\" action when profile loading fails (including backend traps such as Unauthorized).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "There is an error when signing in"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If the app has an identity but `useGetCallerUserProfile()` errors, the UI displays an error panel/page (English text) explaining that initialization failed and provides a button to log out via the existing auth clear/logout flow.",
+        "The app does not get stuck on a blank screen when `getCallerUserProfile` traps/throws; the user always sees a recovery path (logout and retry login)."
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Fix the backend authorization logic so that a newly signed-in Internet Identity principal can successfully call `getCallerUserProfile` (and other user-level escalation CRUD methods) without requiring any out-of-band admin token initialization, while still preventing anonymous callers from accessing protected data.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "There is an error when signing in"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After signing in with Internet Identity, calling `getCallerUserProfile` does not trap with \"Unauthorized\" solely due to missing access-control initialization.",
+        "Anonymous callers (principal is anonymous) are still rejected for profile and escalation CRUD/list/get/update/delete operations.",
+        "Existing admin-only behavior (if any) is not weakened beyond enabling standard authenticated users to use the app."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts or other paths listed in frontend.immutablePaths; compose behavior elsewhere instead.",
+    "Keep all Motoko logic in the single backend actor (backend/main.mo); only add a migration file if a state upgrade is required."
+  ],
+  "nonGoals": [
+    "Adding third-party authentication providers beyond Internet Identity.",
+    "Implementing real-time features (WebSockets/push notifications).",
+    "Changing the escalation data schema or adding new escalation fields unrelated to fixing sign-in."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}
