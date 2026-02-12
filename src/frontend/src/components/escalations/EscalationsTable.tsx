@@ -1,13 +1,14 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import type { Escalation } from '../../backend';
+import type { EscalationResponse } from '../../backend';
+import { EscalationStatus } from '../../backend';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUpDown, Eye } from 'lucide-react';
 
 interface EscalationsTableProps {
-  escalations: Array<Escalation & { id: bigint }>;
+  escalations: Array<EscalationResponse>;
 }
 
 type SortField = 'title' | 'customerName' | 'escalationStatus' | 'createdDate' | 'escalationNumber';
@@ -37,8 +38,9 @@ export default function EscalationsTable({ escalations }: EscalationsTableProps)
           bVal = b.escalationStatus.toLowerCase();
           break;
         case 'createdDate':
-          aVal = new Date(a.createdDate).getTime();
-          bVal = new Date(b.createdDate).getTime();
+          // Convert nanoseconds (bigint) to milliseconds (number)
+          aVal = Number(a.createdDate / BigInt(1000000));
+          bVal = Number(b.createdDate / BigInt(1000000));
           break;
         case 'escalationNumber':
           aVal = a.escalationNumber.toLowerCase();
@@ -61,8 +63,33 @@ export default function EscalationsTable({ escalations }: EscalationsTableProps)
     }
   };
 
-  const handleView = (id: bigint) => {
-    navigate({ to: '/escalation/$escalationId', params: { escalationId: id.toString() } });
+  const handleView = (escalationId: bigint) => {
+    navigate({ to: '/escalation/$escalationId', params: { escalationId: escalationId.toString() } });
+  };
+
+  // Map status enum values to display labels
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case EscalationStatus.Red:
+        return 'RED';
+      case EscalationStatus.Yellow:
+        return 'YELLOW';
+      case EscalationStatus.Green:
+        return 'GREEN';
+      case EscalationStatus.Assessment:
+        return 'Assessment';
+      case EscalationStatus.Resolved:
+        return 'Resolved';
+      default:
+        return status;
+    }
+  };
+
+  // Format timestamp (nanoseconds) to readable date
+  const formatCreatedDate = (timestamp: bigint): string => {
+    // Convert nanoseconds to milliseconds
+    const milliseconds = Number(timestamp / BigInt(1000000));
+    return new Date(milliseconds).toLocaleDateString();
   };
 
   if (escalations.length === 0) {
@@ -115,20 +142,20 @@ export default function EscalationsTable({ escalations }: EscalationsTableProps)
         </TableHeader>
         <TableBody>
           {sortedEscalations.map((escalation) => (
-            <TableRow key={escalation.id.toString()} className="cursor-pointer hover:bg-muted/50">
+            <TableRow key={escalation.escalationId.toString()} className="cursor-pointer hover:bg-muted/50">
               <TableCell className="font-mono text-sm">{escalation.escalationNumber}</TableCell>
               <TableCell className="font-medium max-w-xs truncate">{escalation.title}</TableCell>
               <TableCell className="max-w-xs truncate">{escalation.customerName}</TableCell>
               <TableCell className="hidden md:table-cell max-w-xs truncate">{escalation.projectName}</TableCell>
               <TableCell>
-                <Badge variant="secondary">{escalation.escalationStatus}</Badge>
+                <Badge variant="secondary">{getStatusLabel(escalation.escalationStatus)}</Badge>
               </TableCell>
               <TableCell className="hidden lg:table-cell">{escalation.escalationManager}</TableCell>
               <TableCell className="text-sm text-muted-foreground">
-                {new Date(escalation.createdDate).toLocaleDateString()}
+                {formatCreatedDate(escalation.createdDate)}
               </TableCell>
               <TableCell className="text-right">
-                <Button variant="ghost" size="sm" onClick={() => handleView(escalation.id)}>
+                <Button variant="ghost" size="sm" onClick={() => handleView(escalation.escalationId)}>
                   <Eye className="h-4 w-4" />
                 </Button>
               </TableCell>

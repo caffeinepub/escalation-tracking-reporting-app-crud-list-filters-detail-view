@@ -95,15 +95,36 @@ export interface Escalation {
     escalationManager: string;
     escalationTrend: string;
     title: string;
+    escalationId: EscalationId;
     referenceNumber: string;
     projectName: string;
-    escalationStatus: string;
-    createdDate: string;
+    escalationStatus: EscalationStatus;
+    createdDate: bigint;
     escalationType: string;
     businessGroup: string;
     mainContact: string;
     currentStatus: string;
-    lengthOfEscalation: string;
+    product: string;
+    escalationNumber: string;
+    reason: string;
+    functionalArea: string;
+    deEscalationCriteria: string;
+}
+export interface EscalationResponse {
+    customerName: string;
+    escalationManager: string;
+    escalationTrend: string;
+    title: string;
+    escalationId: EscalationId;
+    referenceNumber: string;
+    projectName: string;
+    escalationStatus: EscalationStatus;
+    createdDate: bigint;
+    escalationType: string;
+    businessGroup: string;
+    mainContact: string;
+    currentStatus: string;
+    lengthOfEscalation: bigint;
     product: string;
     escalationNumber: string;
     reason: string;
@@ -113,6 +134,13 @@ export interface Escalation {
 export interface UserProfile {
     name: string;
 }
+export enum EscalationStatus {
+    Red = "Red",
+    Yellow = "Yellow",
+    Assessment = "Assessment",
+    Green = "Green",
+    Resolved = "Resolved"
+}
 export enum UserRole {
     admin = "admin",
     user = "user",
@@ -121,18 +149,18 @@ export enum UserRole {
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    createEscalation(escalation: Escalation): Promise<EscalationId>;
+    createEscalation(title: string, reason: string, deEscalationCriteria: string, currentStatus: string, escalationManager: string, functionalArea: string, escalationTrend: string, escalationStatus: EscalationStatus, escalationType: string, mainContact: string, customerName: string, projectName: string, referenceNumber: string, businessGroup: string, product: string): Promise<EscalationId>;
     deleteEscalation(escalationId: EscalationId): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getEscalation(escalationId: EscalationId): Promise<Escalation>;
+    getEscalation(escalationId: EscalationId): Promise<EscalationResponse>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
-    listEscalations(): Promise<Array<Escalation>>;
+    listEscalations(): Promise<Array<EscalationResponse>>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateEscalation(escalationId: EscalationId, updatedEscalation: Escalation): Promise<void>;
 }
-import type { UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
+import type { Escalation as _Escalation, EscalationId as _EscalationId, EscalationResponse as _EscalationResponse, EscalationStatus as _EscalationStatus, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
@@ -163,17 +191,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async createEscalation(arg0: Escalation): Promise<EscalationId> {
+    async createEscalation(arg0: string, arg1: string, arg2: string, arg3: string, arg4: string, arg5: string, arg6: string, arg7: EscalationStatus, arg8: string, arg9: string, arg10: string, arg11: string, arg12: string, arg13: string, arg14: string): Promise<EscalationId> {
         if (this.processError) {
             try {
-                const result = await this.actor.createEscalation(arg0);
+                const result = await this.actor.createEscalation(arg0, arg1, arg2, arg3, arg4, arg5, arg6, to_candid_EscalationStatus_n3(this._uploadFile, this._downloadFile, arg7), arg8, arg9, arg10, arg11, arg12, arg13, arg14);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.createEscalation(arg0);
+            const result = await this.actor.createEscalation(arg0, arg1, arg2, arg3, arg4, arg5, arg6, to_candid_EscalationStatus_n3(this._uploadFile, this._downloadFile, arg7), arg8, arg9, arg10, arg11, arg12, arg13, arg14);
             return result;
         }
     }
@@ -195,56 +223,56 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getCallerUserProfile();
-                return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n5(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCallerUserProfile();
-            return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n5(this._uploadFile, this._downloadFile, result);
         }
     }
     async getCallerUserRole(): Promise<UserRole> {
         if (this.processError) {
             try {
                 const result = await this.actor.getCallerUserRole();
-                return from_candid_UserRole_n4(this._uploadFile, this._downloadFile, result);
+                return from_candid_UserRole_n6(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCallerUserRole();
-            return from_candid_UserRole_n4(this._uploadFile, this._downloadFile, result);
+            return from_candid_UserRole_n6(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getEscalation(arg0: EscalationId): Promise<Escalation> {
+    async getEscalation(arg0: EscalationId): Promise<EscalationResponse> {
         if (this.processError) {
             try {
                 const result = await this.actor.getEscalation(arg0);
-                return result;
+                return from_candid_EscalationResponse_n8(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getEscalation(arg0);
-            return result;
+            return from_candid_EscalationResponse_n8(this._uploadFile, this._downloadFile, result);
         }
     }
     async getUserProfile(arg0: Principal): Promise<UserProfile | null> {
         if (this.processError) {
             try {
                 const result = await this.actor.getUserProfile(arg0);
-                return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n5(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getUserProfile(arg0);
-            return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n5(this._uploadFile, this._downloadFile, result);
         }
     }
     async isCallerAdmin(): Promise<boolean> {
@@ -261,18 +289,18 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async listEscalations(): Promise<Array<Escalation>> {
+    async listEscalations(): Promise<Array<EscalationResponse>> {
         if (this.processError) {
             try {
                 const result = await this.actor.listEscalations();
-                return result;
+                return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.listEscalations();
-            return result;
+            return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
         }
     }
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
@@ -292,25 +320,107 @@ export class Backend implements backendInterface {
     async updateEscalation(arg0: EscalationId, arg1: Escalation): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.updateEscalation(arg0, arg1);
+                const result = await this.actor.updateEscalation(arg0, to_candid_Escalation_n13(this._uploadFile, this._downloadFile, arg1));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.updateEscalation(arg0, arg1);
+            const result = await this.actor.updateEscalation(arg0, to_candid_Escalation_n13(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
 }
-function from_candid_UserRole_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
-    return from_candid_variant_n5(_uploadFile, _downloadFile, value);
+function from_candid_EscalationResponse_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _EscalationResponse): EscalationResponse {
+    return from_candid_record_n9(_uploadFile, _downloadFile, value);
 }
-function from_candid_opt_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
+function from_candid_EscalationStatus_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _EscalationStatus): EscalationStatus {
+    return from_candid_variant_n11(_uploadFile, _downloadFile, value);
+}
+function from_candid_UserRole_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
+    return from_candid_variant_n7(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_variant_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_record_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    customerName: string;
+    escalationManager: string;
+    escalationTrend: string;
+    title: string;
+    escalationId: _EscalationId;
+    referenceNumber: string;
+    projectName: string;
+    escalationStatus: _EscalationStatus;
+    createdDate: bigint;
+    escalationType: string;
+    businessGroup: string;
+    mainContact: string;
+    currentStatus: string;
+    lengthOfEscalation: bigint;
+    product: string;
+    escalationNumber: string;
+    reason: string;
+    functionalArea: string;
+    deEscalationCriteria: string;
+}): {
+    customerName: string;
+    escalationManager: string;
+    escalationTrend: string;
+    title: string;
+    escalationId: EscalationId;
+    referenceNumber: string;
+    projectName: string;
+    escalationStatus: EscalationStatus;
+    createdDate: bigint;
+    escalationType: string;
+    businessGroup: string;
+    mainContact: string;
+    currentStatus: string;
+    lengthOfEscalation: bigint;
+    product: string;
+    escalationNumber: string;
+    reason: string;
+    functionalArea: string;
+    deEscalationCriteria: string;
+} {
+    return {
+        customerName: value.customerName,
+        escalationManager: value.escalationManager,
+        escalationTrend: value.escalationTrend,
+        title: value.title,
+        escalationId: value.escalationId,
+        referenceNumber: value.referenceNumber,
+        projectName: value.projectName,
+        escalationStatus: from_candid_EscalationStatus_n10(_uploadFile, _downloadFile, value.escalationStatus),
+        createdDate: value.createdDate,
+        escalationType: value.escalationType,
+        businessGroup: value.businessGroup,
+        mainContact: value.mainContact,
+        currentStatus: value.currentStatus,
+        lengthOfEscalation: value.lengthOfEscalation,
+        product: value.product,
+        escalationNumber: value.escalationNumber,
+        reason: value.reason,
+        functionalArea: value.functionalArea,
+        deEscalationCriteria: value.deEscalationCriteria
+    };
+}
+function from_candid_variant_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    Red: null;
+} | {
+    Yellow: null;
+} | {
+    Assessment: null;
+} | {
+    Green: null;
+} | {
+    Resolved: null;
+}): EscalationStatus {
+    return "Red" in value ? EscalationStatus.Red : "Yellow" in value ? EscalationStatus.Yellow : "Assessment" in value ? EscalationStatus.Assessment : "Green" in value ? EscalationStatus.Green : "Resolved" in value ? EscalationStatus.Resolved : value;
+}
+function from_candid_variant_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     admin: null;
 } | {
     user: null;
@@ -319,8 +429,77 @@ function from_candid_variant_n5(_uploadFile: (file: ExternalBlob) => Promise<Uin
 }): UserRole {
     return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
 }
+function from_candid_vec_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_EscalationResponse>): Array<EscalationResponse> {
+    return value.map((x)=>from_candid_EscalationResponse_n8(_uploadFile, _downloadFile, x));
+}
+function to_candid_EscalationStatus_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: EscalationStatus): _EscalationStatus {
+    return to_candid_variant_n4(_uploadFile, _downloadFile, value);
+}
+function to_candid_Escalation_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Escalation): _Escalation {
+    return to_candid_record_n14(_uploadFile, _downloadFile, value);
+}
 function to_candid_UserRole_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
     return to_candid_variant_n2(_uploadFile, _downloadFile, value);
+}
+function to_candid_record_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    customerName: string;
+    escalationManager: string;
+    escalationTrend: string;
+    title: string;
+    escalationId: EscalationId;
+    referenceNumber: string;
+    projectName: string;
+    escalationStatus: EscalationStatus;
+    createdDate: bigint;
+    escalationType: string;
+    businessGroup: string;
+    mainContact: string;
+    currentStatus: string;
+    product: string;
+    escalationNumber: string;
+    reason: string;
+    functionalArea: string;
+    deEscalationCriteria: string;
+}): {
+    customerName: string;
+    escalationManager: string;
+    escalationTrend: string;
+    title: string;
+    escalationId: _EscalationId;
+    referenceNumber: string;
+    projectName: string;
+    escalationStatus: _EscalationStatus;
+    createdDate: bigint;
+    escalationType: string;
+    businessGroup: string;
+    mainContact: string;
+    currentStatus: string;
+    product: string;
+    escalationNumber: string;
+    reason: string;
+    functionalArea: string;
+    deEscalationCriteria: string;
+} {
+    return {
+        customerName: value.customerName,
+        escalationManager: value.escalationManager,
+        escalationTrend: value.escalationTrend,
+        title: value.title,
+        escalationId: value.escalationId,
+        referenceNumber: value.referenceNumber,
+        projectName: value.projectName,
+        escalationStatus: to_candid_EscalationStatus_n3(_uploadFile, _downloadFile, value.escalationStatus),
+        createdDate: value.createdDate,
+        escalationType: value.escalationType,
+        businessGroup: value.businessGroup,
+        mainContact: value.mainContact,
+        currentStatus: value.currentStatus,
+        product: value.product,
+        escalationNumber: value.escalationNumber,
+        reason: value.reason,
+        functionalArea: value.functionalArea,
+        deEscalationCriteria: value.deEscalationCriteria
+    };
 }
 function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {
     admin: null;
@@ -335,6 +514,29 @@ function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         user: null
     } : value == UserRole.guest ? {
         guest: null
+    } : value;
+}
+function to_candid_variant_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: EscalationStatus): {
+    Red: null;
+} | {
+    Yellow: null;
+} | {
+    Assessment: null;
+} | {
+    Green: null;
+} | {
+    Resolved: null;
+} {
+    return value == EscalationStatus.Red ? {
+        Red: null
+    } : value == EscalationStatus.Yellow ? {
+        Yellow: null
+    } : value == EscalationStatus.Assessment ? {
+        Assessment: null
+    } : value == EscalationStatus.Green ? {
+        Green: null
+    } : value == EscalationStatus.Resolved ? {
+        Resolved: null
     } : value;
 }
 export interface CreateActorOptions {

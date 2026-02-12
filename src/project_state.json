@@ -1,10 +1,17 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 5,
+  "projectStateVersion": 19,
   "summary": "Web-based escalation tracking and reporting application for creating, viewing, and managing escalations with defined escalation/customer/project fields.",
-  "architectural_notes": [],
+  "architectural_notes": [
+    "Escalation Number should be system-generated using pattern ESC-YYYY-<sequence> (sequence uniqueness/scoping to be defined, likely per-year).",
+    "Escalation Status allowed values should include: RED, YELLOW, GREEN, Assessment, Resolved.",
+    "On escalation creation, default Escalation Status should be `Assessment` if not provided by the client.",
+    "\"Length of Escalation\" should be derived (computed) as the number of days since Created Date, not stored as user-entered data."
+  ],
   "known_issues": [
-    "User reports an error when signing in (authentication/sign-in flow failing)."
+    "User reports an error when signing in (authentication/sign-in flow failing).",
+    "UI runtime error: <Select.Item /> has an empty string value prop; Select items must have non-empty values (empty string reserved for clearing/placeholder).",
+    "Clicking an escalation's Actions menu/buttons causes an error or blank screen (likely a frontend runtime/navigation error)."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -63,6 +70,110 @@
         "REQ-9"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-fix-the-runtime-error-caused-by-using-an-empty-string-as-a-selectitem-value-in-the-escalations-filters-by-ensuring-every-selectitem-has-a-non-empty-value-while-still-allowing-the-filter-state-to-be-cleared-to-an-empty-string-to-show-the-placeholder",
+      "title": "Fix the runtime error caused by using an empty string (\"\") as a <SelectItem /> value in the Escalations filters by ensuring every <SelectItem /> has a non-empty value, while still allowing the filter state to be cleared to an empty string to show the placeholder.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-escalation-create-edit-form-ui-so-that-escalation-status-is-a-dropdown-select-with-exactly-these-options-red-yellow-green-resolved-no-free-text-entry",
+      "title": "Update the Escalation Create/Edit form UI so that Escalation Status is a dropdown/select with exactly these options: `RED`, `YELLOW`, `GREEN`, `Resolved` (no free-text entry).",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-escalation-create-edit-form-ui-so-that-the-escalation-number-field-is-not-manually-editable-when-creating-an-escalation-since-it-is-auto-generated-it-should-be-displayed-in-a-read-only-disabled-input-or-replaced-with-an-english-helper-text-indicating-it-will-be-auto-generated-on-save-when-editing-an-escalation-display-the-existing-escalation-number-as-read-only-disabled",
+      "title": "Update the Escalation Create/Edit form UI so that the Escalation Number field is not manually editable when creating an escalation (since it is auto-generated). It should be displayed in a read-only/disabled input or replaced with an English helper text indicating it will be auto-generated on save. When editing an escalation, display the existing Escalation Number as read-only/disabled.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-change-the-current-status-field-in-the-escalation-create-edit-form-to-use-the-same-input-type-and-visual-sizing-as-escalation-reason-i-e-a-multiline-textarea-with-matching-rows-dimensions",
+      "title": "Change the Current Status field in the Escalation Create/Edit form to use the same input type and visual sizing as Escalation Reason (i.e., a multiline textarea with matching rows/dimensions).",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-escalations-filters-ui-so-the-escalation-status-filter-dropdown-shows-the-same-fixed-list-of-statuses-red-yellow-green-resolved-rather-than-deriving-status-options-only-from-existing-data",
+      "title": "Update the Escalations filters UI so the Escalation Status filter dropdown shows the same fixed list of statuses (`RED`, `YELLOW`, `GREEN`, `Resolved`) rather than deriving status options only from existing data.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-to-include-assessment-anywhere-escalation-status-is-shown-as-a-fixed-set-of-options-including-the-create-edit-escalation-form-dropdown-and-the-escalations-filters-status-dropdown-and-any-status-label-mapping-used-for-display-user-facing-label-must-be-exactly-assessment",
+      "title": "Update the frontend to include `Assessment` anywhere Escalation Status is shown as a fixed set of options, including the Create/Edit Escalation form dropdown and the Escalations filters status dropdown (and any status label mapping used for display). User-facing label must be exactly \"Assessment\".",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-create-escalation-form-so-that-the-default-escalation-status-for-a-new-escalation-is-assessment",
+      "title": "Update the Create Escalation form so that the default Escalation Status for a new escalation is `Assessment`.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-create-edit-escalation-form-so-that-the-escalation-trend-field-is-a-dropdown-select-pull-down-with-exactly-these-options-up-down-no-change-no-free-text-entry",
+      "title": "Update the Create/Edit Escalation form so that the \"Escalation Trend\" field is a dropdown/select (pull-down) with exactly these options: \"Up\", \"Down\", \"No Change\" (no free-text entry).",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-create-edit-escalation-form-so-that-the-escalation-type-field-is-a-dropdown-select-pull-down-with-exactly-these-options-corp-proactive-other-no-free-text-entry",
+      "title": "Update the Create/Edit Escalation form so that the \"Escalation Type\" field is a dropdown/select (pull-down) with exactly these options: \"Corp\", \"Proactive\", \"Other\" (no free-text entry).",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-escalation-create-edit-form-so-that-the-length-of-escalation-field-is-no-longer-user-editable-and-is-displayed-as-a-system-calculated-number-of-days-since-the-escalation-s-created-date",
+      "title": "Update the Escalation Create/Edit form so that the \"Length of Escalation\" field is no longer user-editable and is displayed as a system-calculated number of days since the escalation's Created Date.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-escalation-display-views-to-show-length-of-escalation-as-the-calculated-number-of-full-days-since-created-date-based-on-the-stored-createddate-timestamp-rather-than-showing-any-stored-free-text-value",
+      "title": "Update escalation display views to show \"Length of Escalation\" as the calculated number of full days since Created Date (based on the stored createdDate timestamp), rather than showing any stored/free-text value.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-escalations-list-actions-e-g-view-details-navigation-so-that-it-uses-the-backend-provided-escalation-identifier-rather-than-a-ui-generated-index-preventing-navigation-to-non-existent-escalations-and-resulting-error-blank-screens",
+      "title": "Fix the Escalations list 'Actions' (e.g., View/details navigation) so that it uses the backend-provided escalation identifier rather than a UI-generated index, preventing navigation to non-existent escalations and resulting error/blank screens.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-data-flow-and-types-so-that-list-results-carry-and-consistently-use-the-real-escalation-id-returned-by-the-backend-e-g-escalationid-across-list-detail-edit-and-delete-operations-routing-params-react-query-keys-and-mutation-inputs",
+      "title": "Update the frontend data flow and types so that list results carry and consistently use the real escalation ID returned by the backend (e.g., `escalationId`) across list, detail, edit, and delete operations (routing params, React Query keys, and mutation inputs).",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -93,6 +204,100 @@
       "summary": "Fix the backend authorization logic so that a newly signed-in Internet Identity principal can successfully call `getCallerUserProfile` (and other user-level escalation CRUD methods) without requiring any out-of-band admin token initialization, while still preventing anonymous callers from accessing protected data.",
       "reqIds": [
         "REQ-10"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Auto-generate Escalation Number in the format ESC-YYYY-<sequence> (year-based sequence).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Constrain Escalation Status to a select/dropdown list with values: RED, YELLOW, GREEN, Resolved.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Make the Current Status field use the same input type and visual sizing as the Escalation Reason field (e.g., multiline textarea with matching dimensions).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Auto-generate the Escalation Number on escalation creation in the backend using the format `ESC-YYYY-Sequence`, where `YYYY` is the 4-digit year and `Sequence` is a year-based incrementing sequence number (reset each calendar year). The backend must ignore any client-provided `escalationNumber` value on create and always persist the generated value.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Constrain the Escalation Status field to a fixed set of allowed values: `RED`, `YELLOW`, `GREEN`, `Resolved`. Implement backend validation so that create/update traps with a clear English error message if an escalation is saved with any other `escalationStatus` value.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Add a new Escalation Status option/value: `Assessment` (include it anywhere Escalation Status is constrained/validated, e.g., create/edit form dropdown, filters dropdown, and backend validation).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Automatically set `Created Date` when an escalation is created (system-generated timestamp/date; ignore or override any client-provided Created Date on create).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Add a new Escalation Status value `Assessment` to the backend EscalationStatus type and ensure backend validation accepts it anywhere Escalation Status is validated (create and update).",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Default Escalation Status to `Assessment` on new escalation creation (system-set default when client does not provide a status).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Update the backend escalation creation logic so that the system always sets `createdDate` when an escalation is created, ignoring/overriding any client-provided `createdDate` value.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Update the Create/Edit Escalation form UI so that Escalation Trend is a dropdown/select with exactly these options: Up, Down, No Change (no free-text entry).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Update the Create/Edit Escalation form UI so that Escalation Type is a dropdown/select with exactly these options: Corp, Proactive, Other (no free-text entry).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Change the \"Length of Escalation\" field to be a system-calculated value: number of days since the escalation's Created Date (rather than a manually entered field).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Make \"lengthOfEscalation\" a system-derived field on the backend by returning it as the computed number of full days since the stored createdDate in both getEscalation and listEscalations responses (do not rely on client-provided lengthOfEscalation).",
+      "reqIds": [
+        "REQ-26"
       ],
       "status": "pending"
     }

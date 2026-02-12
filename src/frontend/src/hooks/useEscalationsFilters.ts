@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import type { Escalation } from '../backend';
+import type { EscalationResponse } from '../backend';
+import { EscalationStatus } from '../backend';
 
 export interface EscalationFilters {
   escalationStatus: string;
@@ -21,7 +22,16 @@ export const emptyFilters: EscalationFilters = {
   createdDateTo: '',
 };
 
-export function useEscalationsFilters(escalations: Array<Escalation & { id: bigint }>) {
+// Fixed allowed status values
+export const ALLOWED_STATUSES = [
+  EscalationStatus.Red,
+  EscalationStatus.Yellow,
+  EscalationStatus.Green,
+  EscalationStatus.Assessment,
+  EscalationStatus.Resolved,
+];
+
+export function useEscalationsFilters(escalations: Array<EscalationResponse>) {
   const [filters, setFilters] = useState<EscalationFilters>(emptyFilters);
 
   const filteredEscalations = useMemo(() => {
@@ -39,7 +49,9 @@ export function useEscalationsFilters(escalations: Array<Escalation & { id: bigi
 
       // Date range filtering
       if (filters.createdDateFrom || filters.createdDateTo) {
-        const escDate = new Date(esc.createdDate);
+        // Convert nanoseconds (bigint) to milliseconds (number)
+        const milliseconds = Number(esc.createdDate / BigInt(1000000));
+        const escDate = new Date(milliseconds);
         if (filters.createdDateFrom && escDate < new Date(filters.createdDateFrom)) return false;
         if (filters.createdDateTo && escDate > new Date(filters.createdDateTo)) return false;
       }
@@ -63,18 +75,16 @@ export function useEscalationsFilters(escalations: Array<Escalation & { id: bigi
   }, [filteredEscalations]);
 
   const uniqueValues = useMemo(() => {
-    const statuses = new Set<string>();
     const functionalAreas = new Set<string>();
     const businessGroups = new Set<string>();
 
     escalations.forEach((esc) => {
-      if (esc.escalationStatus) statuses.add(esc.escalationStatus);
       if (esc.functionalArea) functionalAreas.add(esc.functionalArea);
       if (esc.businessGroup) businessGroups.add(esc.businessGroup);
     });
 
     return {
-      statuses: Array.from(statuses).sort(),
+      statuses: ALLOWED_STATUSES,
       functionalAreas: Array.from(functionalAreas).sort(),
       businessGroups: Array.from(businessGroups).sort(),
     };

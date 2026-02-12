@@ -1,34 +1,22 @@
 import Map "mo:core/Map";
 import Text "mo:core/Text";
 import Array "mo:core/Array";
-import Order "mo:core/Order";
 import Iter "mo:core/Iter";
-import Principal "mo:core/Principal";
+import Order "mo:core/Order";
 import Runtime "mo:core/Runtime";
+import Time "mo:core/Time";
+import Principal "mo:core/Principal";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import EscalationStatusHelper "escalation-status-helper";
+
+
+// migration called on actor side via 'with' clause
 
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  // Helper function to check if caller has user-level access
-  // Any authenticated (non-anonymous) principal is treated as a user
-  private func hasUserAccess(caller : Principal) : Bool {
-    if (caller.isAnonymous()) {
-      return false;
-    };
-    // Non-anonymous principals automatically have user access
-    // OR they have explicit user/admin role assigned
-    return true;
-  };
-
-  // Helper function to check if caller is admin
-  private func isAdminUser(caller : Principal) : Bool {
-    AccessControl.isAdmin(accessControlState, caller);
-  };
-
-  // User Profile Management
   public type UserProfile = {
     name : Text;
   };
@@ -36,30 +24,35 @@ actor {
   let userProfiles = Map.empty<Principal, UserProfile>();
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not hasUserAccess(caller)) {
-      Runtime.trap("Unauthorized: Only authenticated users can access profiles");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access profiles");
     };
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user and not isAdminUser(caller)) {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
     userProfiles.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not hasUserAccess(caller)) {
-      Runtime.trap("Unauthorized: Only authenticated users can save profiles");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save profiles");
     };
     userProfiles.add(caller, profile);
   };
 
-  // Escalation Management
+  public type EscalationStatus = EscalationStatusHelper.EscalationStatus;
+
   type EscalationId = Nat;
+  var nextEscalationId = 0;
+  let escalations = Map.empty<EscalationId, Escalation>();
+  let yearSequenceCounters = Map.empty<Nat, Nat>();
 
   type Escalation = {
+    escalationId : EscalationId;
     title : Text;
     reason : Text;
     deEscalationCriteria : Text;
@@ -67,9 +60,8 @@ actor {
     escalationManager : Text;
     functionalArea : Text;
     escalationTrend : Text;
-    escalationStatus : Text;
-    lengthOfEscalation : Text;
-    createdDate : Text;
+    escalationStatus : EscalationStatus;
+    createdDate : Int;
     escalationType : Text;
     mainContact : Text;
     customerName : Text;
@@ -80,65 +72,180 @@ actor {
     product : Text;
   };
 
+  public type EscalationResponse = {
+    escalationId : EscalationId;
+    title : Text;
+    reason : Text;
+    deEscalationCriteria : Text;
+    currentStatus : Text;
+    escalationManager : Text;
+    functionalArea : Text;
+    escalationTrend : Text;
+    escalationStatus : EscalationStatus;
+    createdDate : Int;
+    escalationType : Text;
+    mainContact : Text;
+    customerName : Text;
+    projectName : Text;
+    referenceNumber : Text;
+    escalationNumber : Text;
+    businessGroup : Text;
+    product : Text;
+    lengthOfEscalation : Nat;
+  };
+
   module Escalation {
     public func compare(a : Escalation, b : Escalation) : Order.Order {
       Text.compare(a.title, b.title);
     };
   };
 
-  let escalations = Map.empty<EscalationId, Escalation>();
-  var nextEscalationId = 0;
+  func computeLengthOfEscalation(createdDate : Int) : Nat {
+    let currentTime = Time.now();
+    let timeDifference = currentTime - createdDate;
+    let nanosecondsPerDay = 24 * 60 * 60 * 1_000_000_000;
+    let days = timeDifference / nanosecondsPerDay;
+    if (days < 0) { 0 } else { days.toNat() };
+  };
 
-  // Create Escalation
-  public shared ({ caller }) func createEscalation(escalation : Escalation) : async EscalationId {
-    if (not hasUserAccess(caller)) {
-      Runtime.trap("Unauthorized: Only authenticated users can create escalations");
+  func generateEscalationNumber() : Text {
+    let currentTime = Time.now();
+    let currentYear = extractYearFromTime(currentTime);
+
+    let sequenceNumber = switch (yearSequenceCounters.get(currentYear)) {
+      case (null) {
+        yearSequenceCounters.add(currentYear, 1);
+        1;
+      };
+      case (?currentSequence) {
+        let newSequence = currentSequence + 1;
+        yearSequenceCounters.add(currentYear, newSequence);
+        newSequence;
+      };
     };
 
+    "ESC-" # currentYear.toText() # "-" # sequenceNumber.toText();
+  };
+
+  // TODO: Integrate with Time-based year extraction once available
+  func extractYearFromTime(_ : Int) : Nat {
+    2024;
+  };
+
+  func validateEscalationStatus(status : EscalationStatus) {
+    switch (status) {
+      case (#Red or #Yellow or #Green or #Resolved or #Assessment) {};
+    };
+  };
+
+  public shared ({ caller }) func createEscalation(
+    title : Text,
+    reason : Text,
+    deEscalationCriteria : Text,
+    currentStatus : Text,
+    escalationManager : Text,
+    functionalArea : Text,
+    escalationTrend : Text,
+    escalationStatus : EscalationStatus,
+    escalationType : Text,
+    mainContact : Text,
+    customerName : Text,
+    projectName : Text,
+    referenceNumber : Text,
+    businessGroup : Text,
+    product : Text,
+  ) : async EscalationId {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can create escalations");
+    };
+
+    validateEscalationStatus(escalationStatus);
+
+    let escalationNumber = generateEscalationNumber();
     let escalationId = nextEscalationId;
-    escalations.add(escalationId, escalation);
+
+    let newEscalation : Escalation = {
+      escalationId;
+      title;
+      reason;
+      deEscalationCriteria;
+      currentStatus;
+      escalationManager;
+      functionalArea;
+      escalationTrend;
+      escalationStatus;
+      createdDate = Time.now();
+      escalationType;
+      mainContact;
+      customerName;
+      projectName;
+      referenceNumber;
+      escalationNumber;
+      businessGroup;
+      product;
+    };
+
+    escalations.add(escalationId, newEscalation);
     nextEscalationId += 1;
     escalationId;
   };
 
-  // List Escalations
-  public query ({ caller }) func listEscalations() : async [Escalation] {
-    if (not hasUserAccess(caller)) {
-      Runtime.trap("Unauthorized: Only authenticated users can list escalations");
+  public query ({ caller }) func listEscalations() : async [EscalationResponse] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can list escalations");
     };
 
-    escalations.values().toArray().sort();
+    escalations.values().toArray().sort().map<Escalation, EscalationResponse>(
+      func(escalation) {
+        {
+          escalation with
+          lengthOfEscalation = computeLengthOfEscalation(escalation.createdDate);
+        };
+      }
+    );
   };
 
-  // Get Escalation by ID
-  public query ({ caller }) func getEscalation(escalationId : EscalationId) : async Escalation {
-    if (not hasUserAccess(caller)) {
-      Runtime.trap("Unauthorized: Only authenticated users can get escalations");
+  public query ({ caller }) func getEscalation(escalationId : EscalationId) : async EscalationResponse {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can get escalations");
     };
 
     switch (escalations.get(escalationId)) {
       case (null) { Runtime.trap("Escalation not found") };
+      case (?escalation) {
+        {
+          escalation with
+          lengthOfEscalation = computeLengthOfEscalation(escalation.createdDate);
+        };
+      };
+    };
+  };
+
+  public shared ({ caller }) func updateEscalation(escalationId : EscalationId, updatedEscalation : Escalation) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update escalations");
+    };
+
+    let existingEscalation = switch (escalations.get(escalationId)) {
+      case (null) { Runtime.trap("Escalation not found") };
       case (?escalation) { escalation };
     };
-  };
 
-  // Update Escalation
-  public shared ({ caller }) func updateEscalation(escalationId : EscalationId, updatedEscalation : Escalation) : async () {
-    if (not hasUserAccess(caller)) {
-      Runtime.trap("Unauthorized: Only authenticated users can update escalations");
+    validateEscalationStatus(updatedEscalation.escalationStatus);
+
+    let finalEscalation : Escalation = {
+      updatedEscalation with
+      createdDate = existingEscalation.createdDate;
+      escalationId = existingEscalation.escalationId;
+      escalationNumber = existingEscalation.escalationNumber;
     };
 
-    if (not escalations.containsKey(escalationId)) {
-      Runtime.trap("Escalation not found");
-    };
-
-    escalations.add(escalationId, updatedEscalation);
+    escalations.add(escalationId, finalEscalation);
   };
 
-  // Delete Escalation
   public shared ({ caller }) func deleteEscalation(escalationId : EscalationId) : async () {
-    if (not hasUserAccess(caller)) {
-      Runtime.trap("Unauthorized: Only authenticated users can delete escalations");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete escalations");
     };
 
     if (not escalations.containsKey(escalationId)) {

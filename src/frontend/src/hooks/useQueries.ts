@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Escalation, UserProfile } from '../backend';
+import type { Escalation, EscalationResponse, UserProfile } from '../backend';
 
 // User Profile Queries
 export function useGetCallerUserProfile() {
@@ -42,14 +42,11 @@ export function useSaveCallerUserProfile() {
 export function useListEscalations() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<Array<Escalation & { id: bigint }>>({
+  return useQuery<Array<EscalationResponse>>({
     queryKey: ['escalations'],
     queryFn: async () => {
       if (!actor) return [];
-      const escalations = await actor.listEscalations();
-      // Backend doesn't return IDs with escalations, we'll need to track them separately
-      // For now, we'll use index as a workaround
-      return escalations.map((esc, idx) => ({ ...esc, id: BigInt(idx) }));
+      return actor.listEscalations();
     },
     enabled: !!actor && !isFetching,
   });
@@ -58,7 +55,7 @@ export function useListEscalations() {
 export function useGetEscalation(escalationId: bigint) {
   const { actor, isFetching } = useActor();
 
-  return useQuery<Escalation>({
+  return useQuery<EscalationResponse>({
     queryKey: ['escalation', escalationId.toString()],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
@@ -75,7 +72,25 @@ export function useCreateEscalation() {
   return useMutation({
     mutationFn: async (escalation: Escalation) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.createEscalation(escalation);
+      // Backend generates escalationNumber and createdDate, and computes lengthOfEscalation
+      // The createEscalation method takes 15 parameters (no lengthOfEscalation)
+      return actor.createEscalation(
+        escalation.title,
+        escalation.reason,
+        escalation.deEscalationCriteria,
+        escalation.currentStatus,
+        escalation.escalationManager,
+        escalation.functionalArea,
+        escalation.escalationTrend,
+        escalation.escalationStatus,
+        escalation.escalationType,
+        escalation.mainContact,
+        escalation.customerName,
+        escalation.projectName,
+        escalation.referenceNumber,
+        escalation.businessGroup,
+        escalation.product
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['escalations'] });

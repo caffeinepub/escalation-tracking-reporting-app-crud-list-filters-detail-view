@@ -1,41 +1,58 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix auth failure UX and authenticated bootstrap error recovery",
+  "title": "Fix Escalations Actions navigation by using backend escalationId throughout the UI",
   "requirements": [
     {
-      "id": "REQ-8",
-      "summary": "Show a visible Internet Identity login error on the Login page with a safe message and retry action.",
+      "id": "REQ-27",
+      "summary": "Correct Escalations list Actions/View navigation to use the backend-provided escalationId so clicking always opens the intended record and avoids blank/error screens caused by index-based IDs.",
       "acceptanceCriteria": [
-        "When `useInternetIdentity().loginStatus === \"loginError\"`, the Login page renders a visible error message using the available `loginError.message` (or a safe fallback message).",
-        "The error state includes a clear \"Try again\" action that re-invokes login on user interaction.",
-        "No uncaught exceptions are thrown from the Login page when login fails."
+        "On the Escalations Dashboard, clicking the Actions/View control for any escalation always navigates to the correct Escalation Detail page for that same record.",
+        "After deleting an escalation (or after any change in ordering/filtering), the Actions/View control still opens the correct escalation and never opens a different record due to index-based IDs.",
+        "No runtime error or blank screen occurs when clicking Actions/View from the list page; if the escalation truly cannot be loaded, the existing readable error UI on the detail page is shown instead."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/LoginPage.tsx",
+          "path": "frontend/src/components/escalations/EscalationsTable.tsx",
           "operation": "modify",
-          "description": "Add a user-facing error state driven by `loginStatus === \"loginError\"` and `loginError`, rendering an English message (with a safe fallback) and a \"Try again\" button that re-invokes `login()`; remove reliance on console-only error reporting and ensure rendering is exception-safe. Use guidance from the selected \"authorization\" component for handling auth errors in the UI. Verify the component's usage instructions before implementing."
+          "description": "Update the table to use each row’s backend-provided identifier (escalation.escalationId) for the React key and for Actions/View navigation, removing reliance on the UI-generated id/index."
+        },
+        {
+          "path": "frontend/src/pages/EscalationsListPage.tsx",
+          "operation": "modify",
+          "description": "Align the list page wiring to pass list items that include the backend escalationId through to EscalationsTable without introducing or depending on an index-based id."
         }
       ]
     },
     {
-      "id": "REQ-9",
-      "summary": "Handle authenticated bootstrap failures (e.g., caller profile load) by showing a readable error view with logout recovery.",
+      "id": "REQ-28",
+      "summary": "Update frontend data flow and TypeScript types so escalationId is consistently carried and used across list, detail, edit, and delete operations (including routing params and React Query cache keys/mutation inputs) with no artificial IDs.",
       "acceptanceCriteria": [
-        "If the app has an identity but `useGetCallerUserProfile()` errors, the UI displays an error panel/page (English text) explaining that initialization failed and provides a button to log out via the existing auth clear/logout flow.",
-        "The app does not get stuck on a blank screen when `getCallerUserProfile` traps/throws; the user always sees a recovery path (logout and retry login)."
+        "The list query no longer assigns an artificial ID (such as using the array index) for escalations; it uses the backend-returned escalation identifier field.",
+        "EscalationsTable receives an ID that matches the backend escalation identifier and uses it for navigation.",
+        "Detail, edit, and delete operations use the same identifier value as the list and never rely on array index position.",
+        "TypeScript builds without type errors related to escalation IDs after the change."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/AuthBootstrapErrorView.tsx",
-          "operation": "create",
-          "description": "Create a reusable authenticated-bootstrap error view component that shows an English initialization failure message (including a safe, user-readable error detail when available) and a \"Log out\" action that calls the existing `useInternetIdentity().clear()` flow and clears React Query cache (matching current logout behavior). Use guidance from the selected \"authorization\" component for gracefully handling backend authorization traps in the UI. Verify the component's usage instructions before implementing."
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Fix the list query typing and return value to use backend-provided escalationId (remove index-based id mapping), and ensure React Query keys and mutation inputs are consistently based on the same escalationId value."
         },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/escalations/EscalationsTable.tsx",
           "operation": "modify",
-          "description": "Update `RootLayout` to detect and handle `useGetCallerUserProfile()` failures when an identity exists (e.g., `error` state from React Query): render `AuthBootstrapErrorView` instead of proceeding to `AppShell`/routes, preventing blank/error screens and ensuring the user can log out and retry login. Use guidance from the selected \"authorization\" component for auth gating and error recovery. Verify the component's usage instructions before implementing."
+          "description": "Update EscalationsTable prop types to accept the backend list item shape containing escalationId (instead of requiring a synthetic {id}), and consistently use escalationId for navigation and row identity."
+        },
+        {
+          "path": "frontend/src/pages/EscalationDetailPage.tsx",
+          "operation": "modify",
+          "description": "Ensure the detail page continues to interpret the route param as the backend escalationId, and that delete uses that same identifier consistently (no index-based assumptions)."
+        },
+        {
+          "path": "frontend/src/pages/EscalationEditPage.tsx",
+          "operation": "modify",
+          "description": "Ensure the edit page continues to load and update using the route param as the backend escalationId, keeping identifier usage consistent with list and detail flows."
         }
       ]
     }

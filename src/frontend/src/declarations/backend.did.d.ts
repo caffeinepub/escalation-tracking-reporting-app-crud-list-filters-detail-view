@@ -15,15 +15,15 @@ export interface Escalation {
   'escalationManager' : string,
   'escalationTrend' : string,
   'title' : string,
+  'escalationId' : EscalationId,
   'referenceNumber' : string,
   'projectName' : string,
-  'escalationStatus' : string,
-  'createdDate' : string,
+  'escalationStatus' : EscalationStatus,
+  'createdDate' : bigint,
   'escalationType' : string,
   'businessGroup' : string,
   'mainContact' : string,
   'currentStatus' : string,
-  'lengthOfEscalation' : string,
   'product' : string,
   'escalationNumber' : string,
   'reason' : string,
@@ -31,6 +31,32 @@ export interface Escalation {
   'deEscalationCriteria' : string,
 }
 export type EscalationId = bigint;
+export interface EscalationResponse {
+  'customerName' : string,
+  'escalationManager' : string,
+  'escalationTrend' : string,
+  'title' : string,
+  'escalationId' : EscalationId,
+  'referenceNumber' : string,
+  'projectName' : string,
+  'escalationStatus' : EscalationStatus,
+  'createdDate' : bigint,
+  'escalationType' : string,
+  'businessGroup' : string,
+  'mainContact' : string,
+  'currentStatus' : string,
+  'lengthOfEscalation' : bigint,
+  'product' : string,
+  'escalationNumber' : string,
+  'reason' : string,
+  'functionalArea' : string,
+  'deEscalationCriteria' : string,
+}
+export type EscalationStatus = { 'Red' : null } |
+  { 'Yellow' : null } |
+  { 'Assessment' : null } |
+  { 'Green' : null } |
+  { 'Resolved' : null };
 export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -38,14 +64,33 @@ export type UserRole = { 'admin' : null } |
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
-  'createEscalation' : ActorMethod<[Escalation], EscalationId>,
+  'createEscalation' : ActorMethod<
+    [
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      EscalationStatus,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+      string,
+    ],
+    EscalationId
+  >,
   'deleteEscalation' : ActorMethod<[EscalationId], undefined>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
-  'getEscalation' : ActorMethod<[EscalationId], Escalation>,
+  'getEscalation' : ActorMethod<[EscalationId], EscalationResponse>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
-  'listEscalations' : ActorMethod<[], Array<Escalation>>,
+  'listEscalations' : ActorMethod<[], Array<EscalationResponse>>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'updateEscalation' : ActorMethod<[EscalationId, Escalation], undefined>,
 }

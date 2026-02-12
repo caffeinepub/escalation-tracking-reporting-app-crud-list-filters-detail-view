@@ -1,83 +1,56 @@
 {
   "kind": "build_request",
-  "title": "Fix sign-in failure and show actionable authentication errors",
+  "title": "Fix blank/error screen when using Escalation actions by correcting escalation ID wiring",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-8",
-      "text": "Add a user-facing error state on the login screen so that when Internet Identity login fails, the page displays the error message (in English) and provides a retry action, instead of only logging to the console.",
+      "id": "REQ-27",
+      "text": "Fix the Escalations list 'Actions' (e.g., View/details navigation) so that it uses the backend-provided escalation identifier rather than a UI-generated index, preventing navigation to non-existent escalations and resulting error/blank screens.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "There is an error when signing in"
+          "Looks like there is an issue when you try to click on the actions for an escalation, you get an error or blank screen"
         ]
       },
       "acceptanceCriteria": [
-        "When `useInternetIdentity().loginStatus === \"loginError\"`, the Login page renders a visible error message using the available `loginError.message` (or a safe fallback message).",
-        "The error state includes a clear \"Try again\" action that re-invokes login on user interaction.",
-        "No uncaught exceptions are thrown from the Login page when login fails."
+        "On the Escalations Dashboard, clicking the Actions/View control for any escalation always navigates to the correct Escalation Detail page for that same record.",
+        "After deleting an escalation (or after any change in ordering/filtering), the Actions/View control still opens the correct escalation and never opens a different record due to index-based IDs.",
+        "No runtime error or blank screen occurs when clicking Actions/View from the list page; if the escalation truly cannot be loaded, the existing readable error UI on the detail page is shown instead."
       ]
     },
     {
-      "id": "REQ-9",
-      "text": "Prevent post-login blank/error screens by handling failures of the authenticated bootstrap calls (e.g., loading the caller profile) in the authenticated app layout: show a readable error view with a \"Log out\" action when profile loading fails (including backend traps such as Unauthorized).",
+      "id": "REQ-28",
+      "text": "Update the frontend data flow and types so that list results carry and consistently use the real escalation ID returned by the backend (e.g., `escalationId`) across list, detail, edit, and delete operations (routing params, React Query keys, and mutation inputs).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "There is an error when signing in"
+          "Looks like there is an issue when you try to click on the actions for an escalation, you get an error or blank screen"
         ]
       },
       "acceptanceCriteria": [
-        "If the app has an identity but `useGetCallerUserProfile()` errors, the UI displays an error panel/page (English text) explaining that initialization failed and provides a button to log out via the existing auth clear/logout flow.",
-        "The app does not get stuck on a blank screen when `getCallerUserProfile` traps/throws; the user always sees a recovery path (logout and retry login)."
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "text": "Fix the backend authorization logic so that a newly signed-in Internet Identity principal can successfully call `getCallerUserProfile` (and other user-level escalation CRUD methods) without requiring any out-of-band admin token initialization, while still preventing anonymous callers from accessing protected data.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "There is an error when signing in"
-        ]
-      },
-      "acceptanceCriteria": [
-        "After signing in with Internet Identity, calling `getCallerUserProfile` does not trap with \"Unauthorized\" solely due to missing access-control initialization.",
-        "Anonymous callers (principal is anonymous) are still rejected for profile and escalation CRUD/list/get/update/delete operations.",
-        "Existing admin-only behavior (if any) is not weakened beyond enabling standard authenticated users to use the app."
+        "The list query no longer assigns an artificial ID (such as using the array index) for escalations; it uses the backend-returned escalation identifier field.",
+        "EscalationsTable receives an ID that matches the backend escalation identifier and uses it for navigation.",
+        "Detail, edit, and delete operations use the same identifier value as the list and never rely on array index position.",
+        "TypeScript builds without type errors related to escalation IDs after the change."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts or other paths listed in frontend.immutablePaths; compose behavior elsewhere instead.",
-    "Keep all Motoko logic in the single backend actor (backend/main.mo); only add a migration file if a state upgrade is required."
+    "Do not modify any files under frontend/src/components/ui (read-only UI components).",
+    "Keep all backend logic in the existing single Motoko actor (no new backend services)."
   ],
   "nonGoals": [
-    "Adding third-party authentication providers beyond Internet Identity.",
-    "Implementing real-time features (WebSockets/push notifications).",
-    "Changing the escalation data schema or adding new escalation fields unrelated to fixing sign-in."
+    "Redesigning the Escalations table UI beyond what is required to fix the Actions/blank-screen issue.",
+    "Adding new escalation fields or changing backend persistence/schema as part of this fix."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

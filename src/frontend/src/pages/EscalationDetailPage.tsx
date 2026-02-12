@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { useGetEscalation, useDeleteEscalation } from '../hooks/useQueries';
+import { EscalationStatus } from '../backend';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import DeleteEscalationDialog from '../components/escalations/DeleteEscalationDialog';
 import { useState } from 'react';
+import { formatEscalationLength } from '../utils/escalationLength';
 
 export default function EscalationDetailPage() {
   const { escalationId } = useParams({ from: '/escalation/$escalationId' });
@@ -28,6 +30,31 @@ export default function EscalationDetailPage() {
 
   const handleBack = () => {
     navigate({ to: '/' });
+  };
+
+  // Map status enum values to display labels
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case EscalationStatus.Red:
+        return 'RED';
+      case EscalationStatus.Yellow:
+        return 'YELLOW';
+      case EscalationStatus.Green:
+        return 'GREEN';
+      case EscalationStatus.Assessment:
+        return 'Assessment';
+      case EscalationStatus.Resolved:
+        return 'Resolved';
+      default:
+        return status;
+    }
+  };
+
+  // Format timestamp (nanoseconds) to readable date
+  const formatCreatedDate = (timestamp: bigint): string => {
+    // Convert nanoseconds to milliseconds
+    const milliseconds = Number(timestamp / BigInt(1000000));
+    return new Date(milliseconds).toLocaleString();
   };
 
   if (isLoading) {
@@ -59,7 +86,7 @@ export default function EscalationDetailPage() {
     { label: 'Escalation Title', value: escalation.title },
     { label: 'Escalation Number', value: escalation.escalationNumber },
     { label: 'Reference Number', value: escalation.referenceNumber },
-    { label: 'Escalation Status', value: escalation.escalationStatus, badge: true },
+    { label: 'Escalation Status', value: getStatusLabel(escalation.escalationStatus), badge: true },
     { label: 'Current Status', value: escalation.currentStatus },
     { label: 'Escalation Type', value: escalation.escalationType },
     { label: 'Customer Name', value: escalation.customerName },
@@ -70,8 +97,8 @@ export default function EscalationDetailPage() {
     { label: 'Escalation Manager', value: escalation.escalationManager },
     { label: 'Main Contact', value: escalation.mainContact },
     { label: 'Escalation Trend', value: escalation.escalationTrend },
-    { label: 'Length of Escalation', value: escalation.lengthOfEscalation },
-    { label: 'Created Date', value: new Date(escalation.createdDate).toLocaleDateString() },
+    { label: 'Length of Escalation', value: formatEscalationLength(escalation.createdDate) },
+    { label: 'Created Date', value: formatCreatedDate(escalation.createdDate) },
     { label: 'Escalation Reason', value: escalation.reason, fullWidth: true },
     { label: 'De-escalation Criteria', value: escalation.deEscalationCriteria, fullWidth: true },
   ];
@@ -103,7 +130,7 @@ export default function EscalationDetailPage() {
               <CardDescription>Escalation #{escalation.escalationNumber}</CardDescription>
             </div>
             <Badge variant="outline" className="text-base px-3 py-1">
-              {escalation.escalationStatus}
+              {getStatusLabel(escalation.escalationStatus)}
             </Badge>
           </div>
         </CardHeader>

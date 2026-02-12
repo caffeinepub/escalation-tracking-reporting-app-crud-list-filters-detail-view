@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Fix sign-in and post-login failures by showing actionable authentication/initialization errors and correcting backend authorization so newly signed-in users can load their profile.
+**Goal:** Fix blank/error screens when using Escalation list Actions by ensuring navigation and operations use the backend-provided escalation identifier.
 
 **Planned changes:**
-- Update the Login page to display a visible error message when Internet Identity login fails (using `loginError.message` or a safe fallback) and include a “Try again” action that re-attempts login.
-- Update the authenticated app layout to handle failures in bootstrap calls (e.g., `getCallerUserProfile`) by showing a readable error view and offering a “Log out” action to recover.
-- Adjust backend authorization to allow authenticated Internet Identity principals to call `getCallerUserProfile` and other user-level escalation CRUD methods without requiring admin token initialization, while continuing to reject anonymous callers.
+- Update the Escalations list/table Actions (e.g., View/details navigation) to use the real backend escalation ID instead of any UI-generated/index-based identifier.
+- Ensure the escalation ID is carried consistently through the frontend data flow and types for list, detail, edit, and delete (including routing params, React Query keys, and mutation inputs).
+- Prevent index-based ID usage so ordering/filtering/deletions do not cause Actions to open the wrong escalation.
 
-**User-visible outcome:** When sign-in or initial profile loading fails, users see a clear English error message with a recovery action (retry or logout) instead of a blank/error screen; after signing in, authenticated users can successfully load their profile and use protected app features.
+**User-visible outcome:** From the Escalations Dashboard, clicking Actions/View reliably opens the correct Escalation Detail page for that record, without blank/error screens due to incorrect IDs (and if an escalation truly can’t be loaded, the existing readable error UI is shown).

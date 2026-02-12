@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { EscalationStatus } from '../../backend';
 
 interface EscalationsSummaryProps {
   summaries: {
@@ -11,7 +12,25 @@ interface EscalationsSummaryProps {
 }
 
 export default function EscalationsSummary({ summaries, totalCount }: EscalationsSummaryProps) {
-  const renderSummaryGroup = (title: string, data: Record<string, number>) => {
+  // Map status enum values to display labels
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case EscalationStatus.Red:
+        return 'RED';
+      case EscalationStatus.Yellow:
+        return 'YELLOW';
+      case EscalationStatus.Green:
+        return 'GREEN';
+      case EscalationStatus.Assessment:
+        return 'Assessment';
+      case EscalationStatus.Resolved:
+        return 'Resolved';
+      default:
+        return status;
+    }
+  };
+
+  const renderSummaryGroup = (title: string, data: Record<string, number>, isStatus = false) => {
     const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
 
     if (entries.length === 0) {
@@ -24,7 +43,9 @@ export default function EscalationsSummary({ summaries, totalCount }: Escalation
       <div className="space-y-2">
         {entries.map(([key, count]) => (
           <div key={key} className="flex items-center justify-between">
-            <span className="text-sm truncate flex-1">{key || 'Unspecified'}</span>
+            <span className="text-sm truncate flex-1">
+              {isStatus ? getStatusLabel(key) : (key || 'Unspecified')}
+            </span>
             <Badge variant="secondary" className="ml-2">
               {count}
             </Badge>
@@ -40,7 +61,7 @@ export default function EscalationsSummary({ summaries, totalCount }: Escalation
         <CardHeader>
           <CardTitle className="text-base">By Status</CardTitle>
         </CardHeader>
-        <CardContent>{renderSummaryGroup('Status', summaries.byStatus)}</CardContent>
+        <CardContent>{renderSummaryGroup('Status', summaries.byStatus, true)}</CardContent>
       </Card>
 
       <Card>
